@@ -20,7 +20,12 @@ The simplest feedback loop is to keep running random tests until new code covera
 
 # HOW DO I MAKE IT GO?
 
-add kudzu to your test-suite depends,
+1. add kudzu to your test-suite depends,
+2. call the testUntil function of your choice
+   1. testUntilSameQCMany
+   2. testUntilSameHHMany
+   3. testUntilSameLCMany
+3. run with `cabal test --enable-coverage`
 
 # TELL ME MORE
 
