@@ -91,7 +91,7 @@ executable kudzu
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base >=4.14 && < 4.17,
+        base >=4.14 && < 4.19,
         kudzu
 
     -- Directories containing source files.
