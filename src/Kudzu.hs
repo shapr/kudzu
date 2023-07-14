@@ -44,8 +44,8 @@ examineAndCountHH prop = do
   unless passed $ error "property failed"
   tixModuleCount <$> examineTix
 
-testUntilSamyLCMany :: (Traversable t, LC.Testable a) => Int -> t a -> IO (t (Int, Maybe Integer))
-testUntilSamyLCMany howMany ts = do
+testUntilSameLCMany :: (Traversable t, LC.Testable a) => Int -> t a -> IO (t (Int, Maybe Integer))
+testUntilSameLCMany howMany ts = do
   mapM (testUntilSameLC howMany) ts
 
 -- | LeanCheck
