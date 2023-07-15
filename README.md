@@ -21,11 +21,12 @@ The simplest feedback loop is to keep running random tests until new code covera
 # HOW DO I MAKE IT GO?
 
 1. add kudzu to your test-suite depends,
-2. call the testUntil function of your choice
-   1. testUntilSameQCMany
-   2. testUntilSameHHMany
-   3. testUntilSameLCMany
-3. run with `cabal test --enable-coverage`
+2. import the [`Kudzu`] module
+3. call the testUntil function of your choice
+   1. [`testUntilSameQCMany`] or [`testUntilSameQC`]
+   2. [`testUntilSameHHMany`] or [`testUntilSameHH`]
+   3. [`testUntilSameLCMany`] or [`testUntilsameLC`]
+4. run with `cabal test --enable-coverage`
 
 # TELL ME MORE
 
@@ -41,3 +42,11 @@ The best write up of this idea is [Random Test Generation, Coverage Based](https
 # EXAMPLE
 
 You can see kudzu in use in the [tests](https://github.com/shapr/takedouble/blob/main/test/Main.hs) for [takedouble](https://github.com/shapr/takedouble/)
+
+[`Kudzu`]:               https://hackage.haskell.org/package/kudzu/docs/Kudzu.html
+[`testUntilSameQC`]:     https://hackage.haskell.org/package/kudzu/docs/Kudzu.html#v:testUntilSameQC
+[`testUntilSameQCMany`]: https://hackage.haskell.org/package/kudzu/docs/Kudzu.html#v:testUntilSameQCMany
+[`testUntilSameHH`]:     https://hackage.haskell.org/package/kudzu/docs/Kudzu.html#v:testUntilSameHH
+[`testUntilSameHHMany`]: https://hackage.haskell.org/package/kudzu/docs/Kudzu.html#v:testUntilSameHHMany
+[`testUntilSameLC`]:     https://hackage.haskell.org/package/kudzu/docs/Kudzu.html#v:testUntilSameLC
+[`testUntilSameLCMany`]: https://hackage.haskell.org/package/kudzu/docs/Kudzu.html#v:testUntilSameLCMany
