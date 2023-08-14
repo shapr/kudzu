@@ -56,7 +56,7 @@ testUntilSameLC n testable = do
   grabUntilNSame 0 n n (tail rs) r1
 
 examineAndCount :: ([String], Bool) -> IO Integer
-examineAndCount v = unless (snd v) (error "your code is broken") >> tixModuleCount <$> examineTix
+examineAndCount v = unless (snd v) (error $ unwords ("failed with:":fst v)) >> tixModuleCount <$> examineTix
 
 grabUntilNSame :: (Monad m, Eq a) => Int -> Int -> Int -> [m a] -> a -> m (Int, Maybe a)
 grabUntilNSame c _ 0 _ z = pure (c, Just z)
