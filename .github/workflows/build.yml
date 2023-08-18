@@ -1,0 +1,40 @@
+# Builds and tests this Haskell project on "GitHub Actions"
+#
+# some docs: https://github.com/haskell/actions/tree/main/setup
+
+name: build
+on: [push]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Cache ~/.cache/cabal/packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/cabal/packages
+          key:          v1-${{ runner.os }}-cabal-packages-${{ hashFiles('*.cabal') }}
+          restore-keys: v1-${{ runner.os }}-cabal-packages-
+
+      - name: Cache ~/.local/state/cabal
+        uses: actions/cache@v3
+        with:
+          path: ~/.local/state/cabal
+          key:          v1-${{ runner.os }}-cabal-state-${{ hashFiles('*.cabal') }}
+          restore-keys: v1-${{ runner.os }}-cabal-state-${{ hashFiles('*.cabal') }}
+
+      - run: du -hd3 ~/.cache/cabal/packages ~/.local/state/cabal || true
+
+      - run: haddock --version
+      - run: ghc     --version
+      - run: cabal   --version
+      - run: haddock --version
+      - run: ghc-pkg list
+
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - run: cabal update
+      - run: cabal configure --enable-tests --enable-benchmarks --enable-coverage --enable-documentation
+      - run: cabal build
+      - run: cabal test
