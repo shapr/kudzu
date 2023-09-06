@@ -6,6 +6,7 @@ import Control.Monad (unless)
 import qualified Hedgehog as HH
 import qualified Test.LeanCheck as LC
 import qualified Test.QuickCheck as QC
+import qualified Test.QuickCheck.Random as QC
 import Trace.Hpc.Reflect (examineTix)
 import Trace.Hpc.Tix (Tix (..), TixModule (..))
 
@@ -16,15 +17,16 @@ testUntilSameQCMany howMany ts = do
 -- | QuickCheck
 testUntilSameQC :: QC.Testable a => Int -> a -> IO (Int, Maybe Integer)
 testUntilSameQC n testable = do
-  let rs = examineAndCount' <$> repeat testable
+  let rs = map (examineAndCount' testable) [0..n] -- examineAndCount' <$> repeat testable
   r1 <- head rs
   grabUntilNSame 0 n n (tail rs) r1
 
-examineAndCount' :: QC.Testable prop => prop -> IO Integer
-examineAndCount' v = do
+examineAndCount' :: QC.Testable prop => prop -> Int -> IO Integer
+examineAndCount' v size = do
   -- poor QC, you got problems
   -- quickCheckWith (stdArgs {maxSize = 400, maxSuccess = 1}) v
-  QC.quickCheck (QC.withMaxSuccess 1 v)
+  qcg <- QC.newQCGen
+  QC.quickCheckWith (QC.stdArgs { QC.replay = Just (qcg, size)}) (QC.withMaxSuccess 1 v)
   tixModuleCount <$> examineTix
 
 -- | Hedgehog
