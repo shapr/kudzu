@@ -14,7 +14,7 @@ name:               kudzu
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:            0.1.0.0
+version:            0.1.1.0
 
 -- A short (one-line) description of the package.
 synopsis:           coverage driven random testing framework
@@ -45,9 +45,9 @@ maintainer:         shae@scannedinavian.com
 category:           Testing
 
 -- Extra files to be distributed with the package, such as examples or a README.
-extra-source-files: CHANGELOG.md
-                    README.md
+extra-source-files: README.md
                     LICENSE
+extra-doc-files: CHANGELOG.md
 description: Kudzu is a coverage driven random testing framework
 source-repository head
     type: git
@@ -65,11 +65,11 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base
-                    , QuickCheck
-                    , hedgehog
-                    , hpc
-                    , leancheck
+    build-depends:    base >=4.14 && < 4.20
+                    , QuickCheck >= 2.12 && < 2.16
+                    , hedgehog >=1.2 && < 1.5
+                    , hpc >= 0.6.0 && < 0.8.0
+                    , leancheck >= 1.0.0 && < 1.2
 
 
     -- Directories containing source files.
@@ -91,7 +91,7 @@ executable kudzu
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base >=4.14 && < 4.19,
+        base >=4.14 && < 4.20,
         kudzu
 
     -- Directories containing source files.

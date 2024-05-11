@@ -18,8 +18,7 @@ testUntilSameQCMany howMany ts = do
 testUntilSameQC :: (QC.Testable a) => Int -> a -> IO (KudzuResult Integer)
 testUntilSameQC n testable = do
     let rs = map (examineAndCount' testable) [0 .. n]
-    r1 <- head rs
-    grabUntilNSame 0 n n (tail rs) r1
+    grabUntilNSame n rs
 
 examineAndCount' :: (QC.Testable prop) => prop -> Int -> IO Integer
 examineAndCount' v size = do
@@ -33,14 +32,11 @@ testUntilSameHHMany howMany ps = do
     mapM (testUntilSameHH howMany) ps
 
 testUntilSameHH :: Int -> HH.Property -> IO (KudzuResult Integer)
-testUntilSameHH n prop = do
-    let rs = examineAndCountHH <$> repeat prop
-    r1 <- head rs
-    grabUntilNSame 0 n n (tail rs) r1
+testUntilSameHH n prop = grabUntilNSame n $ examineAndCountHH <$> repeat prop
 
 examineAndCountHH :: HH.Property -> IO Integer
 examineAndCountHH prop = do
-    passed <- HH.check prop
+    passed <- HH.check . HH.withTests 1 $ prop
     unless passed $ error "property failed"
     tixModuleCount <$> examineTix
 
@@ -50,32 +46,33 @@ testUntilSameLCMany howMany ts = do
     mapM (testUntilSameLC howMany) ts
 
 testUntilSameLC :: (LC.Testable a) => Int -> a -> IO (KudzuResult Integer)
-testUntilSameLC n testable = do
-    let rs = examineAndCount <$> LC.results testable
-    r1 <- head rs
-    grabUntilNSame 0 n n (tail rs) r1
+testUntilSameLC n testable = grabUntilNSame n $ examineAndCount <$> LC.results testable
 
 examineAndCount :: ([String], Bool) -> IO Integer
 examineAndCount v = unless (snd v) (error $ unwords ("test failed with:" : fst v)) >> tixModuleCount <$> examineTix
 
-data KudzuResult a = KFail Int | KSuccess Int a
+data KudzuResult a = KFail Int | KSuccess Int a deriving (Show, Eq, Ord)
 
-{-
-Keep running property tests until the "amount" of code coverage is the same for N iterations of one test.
-orig: the number of iterations of a test that must have the same amount of code coverage before you give up and stop.
-c: the number of iterations checked
-n: countdown to the success case
-  -}
-grabUntilNSame :: (Monad m, Eq a) => Int -> Int -> Int -> [m a] -> a -> m (KudzuResult a)
-grabUntilNSame c _ 0 _ z = pure $ KSuccess c z -- we reached the desired window size
-grabUntilNSame c _ _ [] _ = pure $ KFail c -- if we run out of list elements for test results, we're done
-grabUntilNSame c orig n (a : as) z = do
-    a' <- a
-    if a' == z -- is the count of regions covered from this run the same as last run?
-        then grabUntilNSame (c + 1) orig (n - 1) as z
-        else grabUntilNSame (c + 1) orig orig as a'
-
--- where go c n a z =
+-- | Keep running property tests until the "amount" of code coverage is the same for N iterations of one test.
+grabUntilNSame ::
+    (Monad m, Eq a) =>
+    -- | How many iterations must be the same?
+    Int ->
+    -- | a lazy list of iterations
+    [m a] ->
+    m (KudzuResult a)
+grabUntilNSame _ [] = pure $ KFail 0
+grabUntilNSame orig (a : as) = do
+    a' <- a -- run the first iteration of the test
+    go 0 orig as a'
+  where
+    go c 0 _ z = pure $ KSuccess c z -- we reached the desired window size
+    go c _ [] _ = pure $ KFail c -- if we run out of list elements for test results, we're done
+    go c n (b : bs) z = do
+        a' <- b
+        if a' == z
+            then go (c + 1) (n - 1) bs z
+            else go (c + 1) orig as a'
 
 -- | How many regions were executed at least once for this module?
 tixCount :: TixModule -> Integer
