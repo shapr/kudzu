@@ -1,0 +1,4 @@
+packages: kudzu-core
+packages: kudzu-quickcheck
+packages: kudzu-hedgehog
+packages: kudzu-leancheck

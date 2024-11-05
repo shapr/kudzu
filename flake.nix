@@ -9,7 +9,7 @@
   outputs = {
     self,
     nixpkgs,
-  }: 
+  }:
     let
       forAllSystems = function:
         nixpkgs.lib.genAttrs [
@@ -19,11 +19,14 @@
           "aarch64-darwin"
         ] (system: function rec {
           inherit system;
-          compilerVersion = "ghc963";
+          compilerVersion = "ghc96";
           pkgs = nixpkgs.legacyPackages.${system};
           hsPkgs = pkgs.haskell.packages.${compilerVersion}.override {
             overrides = hfinal: hprev: {
-              kudzu = hfinal.callCabal2nix "kudzu" ./. {};
+              # kudzu = hfinal.callCabal2nix "kudzu" ./. {};
+              kudzu-core = hfinal.callCabal2nix "kudzu-core" ./kudzu-core/. {};
+              kudzu-leancheck = hfinal.callCabal2nix "kudzu-leancheck" ./kudzu-leancheck/. {};
+
             };
           };
         });
@@ -31,13 +34,14 @@
     {
       # nix fmt
       formatter = forAllSystems ({pkgs, ...}: pkgs.alejandra);
-
+      allowBroken = true;
       # nix develop
       devShell = forAllSystems ({hsPkgs, pkgs, ...}:
         hsPkgs.shellFor {
           # withHoogle = true;
           packages = p: [
-            p.kudzu
+            p.kudzu-core
+            p.kudzu-leancheck
           ];
           buildInputs = with pkgs;
             [
@@ -53,7 +57,8 @@
 
       # nix build
       packages = forAllSystems ({hsPkgs, ...}: {
-          kudzu = hsPkgs.kudzu;
+        kudzu-core = hsPkgs.kudzu-core;
+        kudzu-leancheck = hsPkgs.kudzu-leancheck;
           default = hsPkgs.kudzu;
       });
 
@@ -62,9 +67,9 @@
 
       # nix run
       apps = forAllSystems ({system, ...}: {
-        kudzu = { 
-          type = "app"; 
-          program = "${self.packages.${system}.kudzu}/bin/kudzu"; 
+        kudzu = {
+          type = "app";
+          program = "${self.packages.${system}.kudzu}/bin/kudzu";
         };
         default = self.apps.${system}.kudzu;
       });
